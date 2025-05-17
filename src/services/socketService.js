@@ -1,14 +1,7 @@
 import Session from "../models/Session.js";
 import Socket from "../config/socket.js";
 
-class SocketService {
-  static async updateSocketId(userId, socketId) {
-    await Session.updateOne(
-      { user: userId, active: true },
-      { $set: { socketId } }
-    );
-  }
-
+export default class SocketService {
   static async notifyUserLoggedOut(userId, currentSessionId) {
     const io = Socket.getIO();
 
@@ -21,15 +14,16 @@ class SocketService {
     });
 
     // Notify each session to logout
-    sessions.forEach((session) => {
+    sessions.forEach(async (session) => {
       io.to(session.socketId).emit("force_logout", {
         message: "You have been logged out from another device",
       });
 
       // Invalidate the session
-      Session.updateOne({ _id: session._id }, { $set: { active: false } });
+      await Session.updateOne(
+        { _id: session._id },
+        { $set: { active: false } }
+      );
     });
   }
 }
-
-module.exports = SocketService;

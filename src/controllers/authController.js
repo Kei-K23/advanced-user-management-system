@@ -5,6 +5,7 @@ import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import { successResponse } from "../utils/apiResponse.js";
 import UserService from "../services/userService.js";
+import SocketService from "../services/socketService.js";
 
 const signToken = (id, email) => {
   return jwt.sign({ id, email }, process.env.JWT_SECRET, {
@@ -12,7 +13,7 @@ const signToken = (id, email) => {
   });
 };
 
-const createSendToken = (user, statusCode, req, res) => {
+const createSendToken = async (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
   const expiresIn = process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000;
@@ -31,7 +32,14 @@ const createSendToken = (user, statusCode, req, res) => {
   };
 
   // Create session
-  SessionService.createSession(user, deviceInfo, token, expiresAt);
+  const newSession = await SessionService.createSession(
+    user,
+    deviceInfo,
+    token,
+    expiresAt
+  );
+
+  await SocketService.notifyUserLoggedOut(user._id, newSession._id);
 
   // Remove password from output
   user.password = undefined;

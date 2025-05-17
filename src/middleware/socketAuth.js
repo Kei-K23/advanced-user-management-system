@@ -1,3 +1,4 @@
+import "dotenv/config";
 import jwt from "jsonwebtoken";
 import Session from "../models/Session.js";
 import AppError from "../utils/appError.js";
@@ -5,7 +6,8 @@ import AppError from "../utils/appError.js";
 export default async (socket, next) => {
   try {
     // 1) Get token from handshake
-    const token = socket.handshake.auth.token;
+    const rawToken = socket.handshake.auth?.token;
+    const token = rawToken.split(" ")[1];
 
     if (!token) {
       return next(new AppError("No token provided", 401));

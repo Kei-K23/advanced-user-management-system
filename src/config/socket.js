@@ -8,24 +8,32 @@ export default class Socket {
   static init(httpServer) {
     io = new Server(httpServer, {
       cors: {
-        origin: process.env.CLIENT_URL,
+        origin: "*",
         methods: ["GET", "POST"],
+        credentials: true,
       },
     });
 
     io.use(socketAuth);
 
-    io.on("connection", (socket) => {
+    io.on("connection", async (socket) => {
       console.log(
-        `New socket connection: ${socket.id} for user ${socket.user.id}`
+        `New socket connection: ${socket?.id} for user ${socket?.user?.id}`
       );
 
       // Update session with socket ID
-      SessionService.updateSocketId(socket.user.id, socket.id);
+      await SessionService.updateSocketId(socket.user.id, socket.id);
 
       socket.on("disconnect", () => {
         console.log(`Socket disconnected: ${socket.id}`);
       });
+    });
+
+    io.engine.on("connection_error", (err) => {
+      console.log(err.req); // the request object
+      console.log(err.code); // the error code, for example 1
+      console.log(err.message); // the error message, for example "Session ID unknown"
+      console.log(err.context); // some additional error context
     });
 
     return io;

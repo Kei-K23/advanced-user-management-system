@@ -3,12 +3,6 @@ import AppError from "../utils/appError.js";
 
 export default class SessionService {
   static async createSession(user, deviceInfo, token, expiresAt) {
-    // Deactivate all other sessions for this user
-    await Session.updateMany(
-      { user: user._id, active: true },
-      { $set: { active: false } }
-    );
-
     // Create new session
     const session = await Session.create({
       user: user._id,
@@ -42,6 +36,13 @@ export default class SessionService {
     return await Session.updateMany(
       { user: userId, active: true },
       { $set: { active: false } }
+    );
+  }
+
+  static async updateSocketId(userId, socketId) {
+    return await Session.updateOne(
+      { user: userId, active: true },
+      { $set: { socketId } }
     );
   }
 }
