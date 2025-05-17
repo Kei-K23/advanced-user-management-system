@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import { getCurrentUser } from "../api/auth";
+import { getCurrentUser, logout as backendApiLogout } from "../api/auth";
 import { setupSocket } from "../api/socket";
 import { toaster } from "../components/ui/toaster";
 
@@ -22,6 +22,18 @@ export const AuthProvider = ({ children }) => {
     queryKey: ["auth", "me"],
     queryFn: getCurrentUser,
     retry: false,
+  });
+
+  const { mutate } = useMutation({
+    mutationFn: backendApiLogout,
+    onSuccess: ({ message }) => {
+      toaster.create({ title: message, type: "success" });
+      if (socket) socket.disconnect();
+      localStorage.removeItem("token");
+      setToken(null);
+      setSocket(null);
+      queryClient.clear();
+    },
   });
 
   useEffect(() => {
@@ -61,11 +73,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    if (socket) socket.disconnect();
-    localStorage.removeItem("token");
-    setToken(null);
-    setSocket(null);
-    queryClient.clear();
+    mutate();
   };
 
   const value = {
