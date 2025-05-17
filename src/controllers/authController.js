@@ -1,13 +1,13 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-const SessionService = require("../services/sessionService");
-const AppError = require("../utils/appError");
-const catchAsync = require("../utils/catchAsync");
-const { successResponse, errorResponse } = require("../utils/apiResponse");
-const { promisify } = require("util");
+import SessionService from "../services/sessionService.js";
+import AppError from "../utils/appError.js";
+import catchAsync from "../utils/catchAsync.js";
+import { successResponse } from "../utils/apiResponse.js";
+import UserService from "../services/userService.js";
 
-const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const signToken = (id, email) => {
+  return jwt.sign({ id, email }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
@@ -39,7 +39,7 @@ const createSendToken = (user, statusCode, req, res) => {
   successResponse(res, { user, token }, "Logged in successfully", statusCode);
 };
 
-exports.login = catchAsync(async (req, res, next) => {
+export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   // 1) Check if email and password exist
@@ -48,7 +48,12 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 2) Check if user exists && password is correct
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({
+    email,
+    accountStatus: {
+      $ne: "DELETE",
+    },
+  })?.select("+password");
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError("Incorrect email or password", 401));
@@ -58,67 +63,92 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, req, res);
 });
 
-exports.logout = catchAsync(async (req, res, next) => {
+export const register = catchAsync(async (req, res, next) => {
+  const { username, email, displayName, password: pass } = req.body;
+
+  // 1) Check if email and password exist
+  if (!email || !pass || !username || !displayName) {
+    return next(
+      new AppError(
+        "Please provide username, display name, email and password!",
+        400
+      )
+    );
+  }
+
+  const user = await User.findOne({
+    $or: [{ email }, { username }],
+  });
+
+  if (user) {
+    return next(new AppError("User already exist", 400));
+  }
+
+  const { password, ...newUser } = (
+    await UserService.createUser(username, displayName, email, pass)
+  ).toJSON();
+
+  successResponse(res, newUser, "Register successful", 201);
+});
+
+export const logout = catchAsync(async (req, res, _next) => {
   // Invalidate current session
   await SessionService.invalidateSession(req.session.token);
 
   successResponse(res, null, "Logged out successfully");
 });
 
-exports.protect = catchAsync(async (req, res, next) => {
-  // 1) Getting token and check if it's there
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
+export const getMe = catchAsync(async (req, res, _next) => {
+  const user = req.user;
 
-  if (!token) {
-    return next(
-      new AppError("You are not logged in! Please log in to get access.", 401)
-    );
-  }
+  successResponse(res, user, "Get auth user");
+});
 
-  // 2) Verification token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+export const updateMe = catchAsync(async (req, res, next) => {
+  const authUser = req.user;
+  const { username, displayName, email } = req.body;
 
-  // 3) Check if user still exists
-  const currentUser = await User.findById(decoded.id);
-  if (!currentUser) {
-    return next(
-      new AppError(
-        "The user belonging to this token does no longer exist.",
-        401
-      )
-    );
-  }
-
-  // 4) Check if user changed password after the token was issued
-  if (currentUser.changedPasswordAfter(decoded.iat)) {
-    return next(
-      new AppError("User recently changed password! Please log in again.", 401)
-    );
-  }
-
-  // 5) Check if session is still active
-  const session = await Session.findOne({
-    token,
-    user: currentUser._id,
-    active: true,
+  const user = await User.findOne({
+    $or: [{ email }, { username }],
   });
 
-  if (!session) {
-    return next(
-      new AppError("Your session has expired or been invalidated!", 401)
-    );
+  if (user) {
+    return next(new AppError("Username or email already taken", 400));
   }
 
-  // GRANT ACCESS TO PROTECTED ROUTE
-  req.user = currentUser;
-  req.session = session;
-  next();
+  const { password, ...updatedUser } = (
+    await User.findByIdAndUpdate(
+      authUser._id,
+      {
+        $set: {
+          username,
+          email,
+          displayName,
+        },
+      },
+      { new: true, runValidators: true }
+    )
+  ).toJSON();
+
+  successResponse(res, updatedUser, "Successfully update the user");
+});
+
+export const deleteMe = catchAsync(async (req, res, _next) => {
+  const authUser = req.user;
+
+  await SessionService.invalidateAllSessions(authUser._id);
+
+  const { password, ...deletedUser } = (
+    await User.findByIdAndUpdate(
+      authUser._id,
+      {
+        $set: {
+          accountStatus: "DELETE",
+        },
+      },
+      { new: true, runValidators: true }
+    )
+  ).toJSON();
+
+  successResponse(res, deletedUser, "Successfully delete the user");
 });

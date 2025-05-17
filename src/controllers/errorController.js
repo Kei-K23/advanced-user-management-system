@@ -1,10 +1,15 @@
-const { errorResponse } = require("../utils/apiResponse");
-const { default: AppError } = require("../utils/appError");
-const { default: logger } = require("../utils/logger");
+import { errorResponse } from "../utils/apiResponse.js";
+import AppError from "../utils/appError.js";
+import logger from "../utils/logger.js";
 
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
+};
+
+export const handleNotfoundError = (resource, value) => {
+  const message = `${resource} not found for ${value}`;
+  return new AppError(message, 404);
 };
 
 const handleDuplicateFieldsDB = (err) => {

@@ -3,6 +3,10 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
+    displayName: {
+      type: String,
+      required: true,
+    },
     username: {
       type: String,
       required: true,
@@ -22,9 +26,15 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
-    active: {
+    accountStatus: {
+      type: String,
+      required: true,
+      enum: ["PENDING", "ACTIVE", "TEMPORARY_BAN", "BAN", "DELETE"],
+      default: "PENDING",
+    },
+    isOnline: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   {

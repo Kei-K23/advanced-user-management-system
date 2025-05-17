@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import Session from "../models/Session.js";
 import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
+import UserService from "../services/userService.js";
 
 export default catchAsync(async (req, _res, next) => {
   // 1) Get token and check if it exists
@@ -23,7 +24,7 @@ export default catchAsync(async (req, _res, next) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
   // 3) Check if user still exists
-  const currentUser = await User.findById(decoded.id);
+  const currentUser = await UserService.findUserById(decoded.id);
   if (!currentUser) {
     return next(
       new AppError(
@@ -33,14 +34,7 @@ export default catchAsync(async (req, _res, next) => {
     );
   }
 
-  // 4) Check if user changed password after the token was issued
-  if (currentUser.changedPasswordAfter(decoded.iat)) {
-    return next(
-      new AppError("User recently changed password! Please log in again.", 401)
-    );
-  }
-
-  // 5) Check if session is still active
+  // 4) Check if session is still active
   const session = await Session.findOne({
     token,
     user: currentUser._id,
