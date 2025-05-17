@@ -22,7 +22,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "build": "cd frontend && npm run build",
+    "build": "npm i && cd frontend && npm i && npm run build",
     "start": "node src/server.js",
     "start:dev": "nodemon src/server.js"
   },
