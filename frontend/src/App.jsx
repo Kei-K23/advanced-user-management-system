@@ -4,6 +4,7 @@ import AuthLayout from "./layout/AuthLayout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

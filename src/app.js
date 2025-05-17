@@ -60,8 +60,13 @@ app.get("/api/health-check", (_req, res) => {
 });
 app.use("/api/v1/auth", authRoutes);
 
-// For all other routes, send back index.html (React Router support)
-app.get("/", (req, res) => {
+app.use((req, res, next) => {
+  if (req.originalUrl.startsWith("/api")) {
+    // Let 404 handler catch unrecognized API routes
+    return next();
+  }
+
+  // Send index.html for frontend routes (e.g., /login, /dashboard, etc.)
   res.sendFile(join(frontendDistPath, "index.html"));
 });
 
