@@ -39,9 +39,9 @@ export default class SessionService {
     );
   }
 
-  static async updateSocketId(userId, socketId) {
+  static async updateSocketId(userId, socketId, device) {
     return await Session.updateOne(
-      { user: userId, active: true },
+      { user: userId, "deviceInfo.device": device, active: true },
       { $set: { socketId } }
     );
   }

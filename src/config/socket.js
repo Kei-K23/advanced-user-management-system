@@ -22,7 +22,11 @@ export default class Socket {
       );
 
       // Update session with socket ID
-      await SessionService.updateSocketId(socket.user.id, socket.id);
+      await SessionService.updateSocketId(
+        socket.user.id,
+        socket.id,
+        socket?.session?.deviceInfo?.device
+      );
 
       socket.on("disconnect", () => {
         console.log(`Socket disconnected: ${socket.id}`);
