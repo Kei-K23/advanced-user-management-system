@@ -19,16 +19,3 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
-
-// Add response interceptor to handle errors
-// api.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response?.status === 401) {
-//       // Handle unauthorized access
-//       localStorage.removeItem("token");
-//       window.location.href = "/login";
-//     }
-//     return Promise.reject(error);
-//   }
-// );

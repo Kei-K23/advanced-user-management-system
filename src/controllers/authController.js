@@ -39,7 +39,11 @@ const createSendToken = async (user, statusCode, req, res) => {
     expiresAt
   );
 
-  await SocketService.notifyUserLoggedOut(user._id, newSession._id);
+  await SocketService.notifyUserLoggedOut(
+    user._id,
+    newSession._id,
+    deviceInfo.device
+  );
 
   // Remove password from output
   user.password = undefined;

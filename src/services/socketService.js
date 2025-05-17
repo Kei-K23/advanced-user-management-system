@@ -2,13 +2,14 @@ import Session from "../models/Session.js";
 import Socket from "../config/socket.js";
 
 export default class SocketService {
-  static async notifyUserLoggedOut(userId, currentSessionId) {
+  static async notifyUserLoggedOut(userId, currentSessionId, currentDevice) {
     const io = Socket.getIO();
 
     // Find all active sessions except the current one
     const sessions = await Session.find({
       user: userId,
       active: true,
+      "deviceInfo.device": currentDevice,
       _id: { $ne: currentSessionId },
       socketId: { $exists: true },
     });
