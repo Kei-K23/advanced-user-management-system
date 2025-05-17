@@ -18,7 +18,7 @@ export default class Socket {
 
     io.on("connection", async (socket) => {
       console.log(
-        `New socket connection: ${socket?.id} for user ${socket?.user?.id}`
+        `New socket connection: ${socket?.id} for user ${socket?.user?.id} from device - ${socket?.session?.deviceInfo?.device} - OS ${socket?.session?.deviceInfo?.os}`
       );
 
       // Update session with socket ID
