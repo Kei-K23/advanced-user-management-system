@@ -10,13 +10,19 @@ import AppError from "./utils/appError.js";
 import globalErrorHandler from "./controllers/errorController.js";
 import authRoutes from "./routes/authRoutes.js";
 import { successResponse } from "./utils/apiResponse.js";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const frontendDistPath = join(__dirname, "../frontend/dist");
 
 const app = express();
 
 // 1) GLOBAL MIDDLEWARES
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173"],
     credentials: true,
   })
 );
@@ -45,11 +51,19 @@ app.use(cookieParser());
 // User agent parser
 app.use(useragent.express());
 
+// Server Frontend public static files
+app.use(express.static(frontendDistPath));
+
 // 2) ROUTES
 app.get("/api/health-check", (_req, res) => {
   successResponse(res, null, "Server is running healthily");
 });
 app.use("/api/v1/auth", authRoutes);
+
+// For all other routes, send back index.html (React Router support)
+app.get("/", (req, res) => {
+  res.sendFile(join(frontendDistPath, "index.html"));
+});
 
 // 3) ERROR HANDLING
 app.use((req, _res, next) =>
