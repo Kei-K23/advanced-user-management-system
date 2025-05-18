@@ -6,6 +6,8 @@ import Register from "./pages/Register";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import DashboardLayout from "./layout/DashboardLayout";
+import Users from "./pages/Users";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -16,6 +18,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <ProtectedRoute>
+              <Users />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />
