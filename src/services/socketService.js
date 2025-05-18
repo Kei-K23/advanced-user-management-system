@@ -1,8 +1,14 @@
 import Session from "../models/Session.js";
 import Socket from "../config/socket.js";
+import User from "../models/User.js";
 
 export default class SocketService {
-  static async notifyUserLoggedOut(userId, currentSessionId, currentDevice) {
+  static async notifyUserLoggedOut(
+    userId,
+    userRole,
+    currentSessionId,
+    currentDevice
+  ) {
     const io = Socket.getIO();
 
     // Find all active sessions except the current one
@@ -26,5 +32,27 @@ export default class SocketService {
         { $set: { active: false } }
       );
     });
+    console.log(userId, userRole);
+
+    // Check login user is member and them send notifi event to super admin user
+    if (userRole === "MEMBER") {
+      const admins = await User.find({
+        role: { $in: ["ADMIN", "SUPER_ADMIN"] },
+      });
+
+      const adminIds = admins.map((admin) => admin._id);
+
+      const activeSessions = await Session.find({
+        user: { $in: adminIds },
+        active: true,
+      });
+      console.log(activeSessions, admins);
+
+      activeSessions.forEach(async (session) => {
+        io.to(session.socketId).emit("notify_event", {
+          message: "Notify to update users list",
+        });
+      });
+    }
   }
 }

@@ -9,6 +9,7 @@ import morgan from "morgan";
 import AppError from "./utils/appError.js";
 import globalErrorHandler from "./controllers/errorController.js";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import { successResponse } from "./utils/apiResponse.js";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -59,6 +60,7 @@ app.get("/api/health-check", (_req, res) => {
   successResponse(res, null, "Server is running healthily");
 });
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith("/api")) {

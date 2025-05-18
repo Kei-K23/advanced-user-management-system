@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import SessionService from "../services/sessionService.js";
 import socketAuth from "../middleware/socketAuth.js";
 import User from "../models/User.js";
+import Session from "../models/Session.js";
 
 let io;
 
@@ -29,16 +30,62 @@ export default class Socket {
         socket?.session?.deviceInfo?.device
       );
 
-      await User.findByIdAndUpdate(socket?.user?.id, {
-        isOnline: true,
-      });
+      const updatedUser = await User.findByIdAndUpdate(
+        socket?.user?.id,
+        {
+          isOnline: true,
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (updatedUser?.role === "MEMBER") {
+        const admins = await User.find({
+          role: { $in: ["ADMIN", "SUPER_ADMIN"] },
+        });
+
+        const adminIds = admins.map((admin) => admin._id);
+
+        const activeSessions = await Session.find({
+          user: { $in: adminIds },
+          active: true,
+        });
+
+        activeSessions.forEach(async (session) => {
+          io.to(session.socketId).emit("notify_event", {
+            message: "Notify to update users list",
+          });
+        });
+      }
 
       socket.on("disconnect", async () => {
         console.log(`Socket disconnected: ${socket.id}`);
 
-        await User.findByIdAndUpdate(socket?.user?.id, {
-          isOnline: false,
-        });
+        const updatedUser = await User.findByIdAndUpdate(
+          socket?.user?.id,
+          {
+            isOnline: false,
+          },
+          { new: true, runValidators: true }
+        );
+
+        if (updatedUser?.role === "MEMBER") {
+          const admins = await User.find({
+            role: { $in: ["ADMIN", "SUPER_ADMIN"] },
+          });
+
+          const adminIds = admins.map((admin) => admin._id);
+
+          const activeSessions = await Session.find({
+            user: { $in: adminIds },
+            active: true,
+          });
+
+          activeSessions.forEach(async (session) => {
+            io.to(session.socketId).emit("notify_event", {
+              message: "Notify to update users list",
+            });
+          });
+        }
       });
     });
 

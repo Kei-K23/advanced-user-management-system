@@ -4,7 +4,7 @@ import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import UserService from "../services/userService.js";
 
-export default catchAsync(async (req, _res, next) => {
+export const authenticate = catchAsync(async (req, _res, next) => {
   // 1) Get token and check if it exists
   let token;
   if (
@@ -52,3 +52,16 @@ export default catchAsync(async (req, _res, next) => {
   req.session = session;
   next();
 });
+
+export const checkRole = ({ roles }) =>
+  catchAsync(async (req, _res, next) => {
+    const user = req.user;
+
+    if (!user || !roles.includes(user.role)) {
+      return next(
+        new AppError("You do not have permission to perform this action!", 403)
+      );
+    }
+
+    next();
+  });
