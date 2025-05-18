@@ -6,6 +6,7 @@ import catchAsync from "../utils/catchAsync.js";
 import { successResponse } from "../utils/apiResponse.js";
 import UserService from "../services/userService.js";
 import SocketService from "../services/socketService.js";
+import Session from "../models/Session.js";
 
 const signToken = (id, email) => {
   return jwt.sign({ id, email }, process.env.JWT_SECRET, {
@@ -118,6 +119,20 @@ export const getMe = catchAsync(async (req, res, _next) => {
   const user = req.user;
 
   successResponse(res, user, "Get auth user");
+});
+
+export const getSessionsForAuthUser = catchAsync(async (req, res, _next) => {
+  const user = req.user;
+
+  const sessions = await Session.find({
+    user: user._id,
+  })
+    .sort({
+      createdAt: "desc",
+    })
+    .lean();
+
+  successResponse(res, sessions, "Get auth user");
 });
 
 export const updateMe = catchAsync(async (req, res, next) => {

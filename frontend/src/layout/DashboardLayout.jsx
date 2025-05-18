@@ -55,11 +55,11 @@ export default function DashboardLayout() {
       {/* Sidebar */}
       <Flex
         width={"1/5"}
-        height={"full"}
         bg={"whiteAlpha.100"}
         borderRightColor={"whiteAlpha.200"}
         borderRightWidth={"thin"}
         px={3}
+        height={"full"}
         justifyContent={"center"}
         alignItems={"center"}
         flexDir={"column"}

@@ -20,6 +20,11 @@ export const getCurrentUser = async () => {
   return response.data.data;
 };
 
+export const getCurrentUserSessions = async () => {
+  const response = await api.get("/auth/me/sessions");
+  return response.data.data;
+};
+
 export const updateCurrentUser = async (data) => {
   const response = await api.patch("/auth/me", data);
   return response.data;
