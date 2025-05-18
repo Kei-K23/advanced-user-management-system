@@ -1,27 +1,41 @@
-import { useQuery } from "@tanstack/react-query";
-import { getCurrentUserSessions } from "../api/auth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  deleteCurrentUserInActiveSessions,
+  getCurrentUserSessions,
+} from "../api/auth";
+import { FaTrashAlt } from "react-icons/fa";
 import {
   Box,
+  Button,
   Card,
-  CardBody,
-  CardHeader,
   Center,
-  Container,
   Flex,
   Heading,
-  SimpleGrid,
   Spinner,
   Stack,
   Tag,
   Text,
 } from "@chakra-ui/react";
 import dayjs from "dayjs";
+import { toaster } from "../components/ui/toaster";
 
 export default function Logs() {
+  const queryClient = useQueryClient();
   const { data: sessions, isLoading } = useQuery({
     queryKey: ["auth", "me", "sessions"],
     queryFn: getCurrentUserSessions,
     retry: false,
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: deleteCurrentUserInActiveSessions,
+    onSuccess: ({ message }) => {
+      queryClient.invalidateQueries({ queryKey: ["auth", "me", "sessions"] });
+      toaster.create({ title: message, type: "success" });
+    },
+    onError: (data) => {
+      toaster.create({ title: data.response.data.message, type: "error" });
+    },
   });
 
   if (isLoading) {
@@ -41,17 +55,34 @@ export default function Logs() {
       height={"full"}
       flexDir={"column"}
     >
-      <Heading size="lg" mb={6}>
-        Your Login Session Logs
-      </Heading>
+      <Flex alignContent={"center"} justifyContent={"space-between"}>
+        <Heading size="lg" mb={6}>
+          Your Login Session Logs
+        </Heading>
+        <Button
+          disabled={isPending}
+          size={"sm"}
+          variant={"outline"}
+          colorPalette={"red"}
+          onClick={mutate}
+        >
+          <FaTrashAlt />
+          Delete All Inactive Sessions
+        </Button>
+      </Flex>
 
       <Flex p={0} flex={1} overflow={"scroll"} w={"full"} maxH={"75vh"}>
         {sessions?.length === 0 ? (
           <Text>No session data available.</Text>
         ) : (
-          <SimpleGrid w={"full"} columns={{ base: 1, md: 1, lg: 1 }} spaceY={4}>
+          <Flex flexDir={"column"} w={"full"} gapY={5}>
             {sessions?.map((session) => (
-              <Card.Root key={session._id} boxShadow="md" borderRadius="xl">
+              <Card.Root
+                key={session._id}
+                boxShadow="md"
+                borderRadius="xl"
+                h={"fit-content"}
+              >
                 <Card.Body>
                   <Stack
                     spacing={1}
@@ -97,7 +128,7 @@ export default function Logs() {
                 </Card.Body>
               </Card.Root>
             ))}
-          </SimpleGrid>
+          </Flex>
         )}
       </Flex>
     </Box>

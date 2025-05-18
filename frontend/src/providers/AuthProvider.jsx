@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
     data: user,
     isLoading,
     isError,
+    refetch: refetchUser,
   } = useQuery({
     queryKey: ["auth", "me"],
     queryFn: getCurrentUser,
@@ -60,6 +61,10 @@ export const AuthProvider = ({ children }) => {
       });
       navigate("/login");
     });
+
+    setTimeout(() => {
+      refetchUser();
+    }, 5000);
 
     return () => {
       newSocket.disconnect();

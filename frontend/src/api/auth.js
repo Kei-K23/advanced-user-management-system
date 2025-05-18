@@ -29,3 +29,13 @@ export const updateCurrentUser = async (data) => {
   const response = await api.patch("/auth/me", data);
   return response.data;
 };
+
+export const deleteCurrentUser = async () => {
+  const response = await api.delete("/auth/me");
+  return response.data;
+};
+
+export const deleteCurrentUserInActiveSessions = async () => {
+  const response = await api.delete("/auth/me/sessions");
+  return response.data;
+};

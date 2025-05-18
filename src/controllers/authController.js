@@ -183,3 +183,14 @@ export const deleteMe = catchAsync(async (req, res, _next) => {
 
   successResponse(res, deletedUser, "Successfully delete the user");
 });
+
+export const deleteInActiveSessions = catchAsync(async (req, res, _next) => {
+  const authUser = req.user;
+
+  await Session.deleteMany({
+    user: authUser._id,
+    active: false,
+  });
+
+  successResponse(res, null, "Successfully delete all inactive sessions data");
+});

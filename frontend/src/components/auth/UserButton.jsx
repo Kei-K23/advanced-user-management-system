@@ -1,4 +1,4 @@
-import { Avatar, Icon, Menu, Portal } from "@chakra-ui/react";
+import { Avatar, Icon, Menu, Portal, Status } from "@chakra-ui/react";
 import { useAuth } from "../../providers/AuthProvider";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { MdOutlineLogout } from "react-icons/md";
@@ -9,7 +9,16 @@ export default function UserButton() {
 
   return (
     <Menu.Root positioning={{ placement: "bottom" }}>
-      <Menu.Trigger>
+      <Menu.Trigger position={"relative"}>
+        <Status.Root
+          colorPalette={user?.isOnline ? "green" : "yellow"}
+          position={"absolute"}
+          zIndex={"banner"}
+          top={"0"}
+          right={"1"}
+        >
+          <Status.Indicator />
+        </Status.Root>
         <Avatar.Root>
           <Avatar.Fallback name={user?.username} />
           <Avatar.Image src={user?.username} />
