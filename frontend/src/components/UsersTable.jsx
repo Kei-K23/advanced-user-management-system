@@ -5,6 +5,8 @@ import {
   ActionBar,
   Button,
   Checkbox,
+  Flex,
+  Icon,
   Kbd,
   Menu,
   Portal,
@@ -14,6 +16,8 @@ import {
 import { HiDotsVertical } from "react-icons/hi";
 import { useAuth } from "../providers/AuthProvider";
 import { toaster } from "./ui/toaster";
+import { CiDesktop, CiMobile1 } from "react-icons/ci";
+import { MdDeviceUnknown } from "react-icons/md";
 
 export default function UsersTable() {
   const queryClient = useQueryClient();
@@ -81,6 +85,21 @@ export default function UsersTable() {
       <Table.Cell>{item.username}</Table.Cell>
       <Table.Cell>{item.email}</Table.Cell>
       <Table.Cell>{item.accountStatus}</Table.Cell>
+      <Table.Cell>
+        <Flex>
+          {item.sessions.map((session, index) => (
+            <Icon key={index} size={"lg"} color={"teal.500"}>
+              {session?.deviceInfo?.device === "Desktop" ? (
+                <CiDesktop />
+              ) : session?.deviceInfo?.device === "Mobile" ? (
+                <CiMobile1 />
+              ) : (
+                <MdDeviceUnknown />
+              )}
+            </Icon>
+          ))}
+        </Flex>
+      </Table.Cell>
       <Table.Cell>{item.displayName}</Table.Cell>
       <Table.Cell>
         <Tag.Root colorPalette={item.isOnline ? "green" : "yellow"}>
