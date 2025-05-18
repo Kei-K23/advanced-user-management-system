@@ -80,6 +80,7 @@ export default function UsersTable() {
       </Table.Cell>
       <Table.Cell>{item.username}</Table.Cell>
       <Table.Cell>{item.email}</Table.Cell>
+      <Table.Cell>{item.accountStatus}</Table.Cell>
       <Table.Cell>{item.displayName}</Table.Cell>
       <Table.Cell>
         <Tag.Root colorPalette={item.isOnline ? "green" : "yellow"}>
@@ -147,6 +148,7 @@ export default function UsersTable() {
             </Table.ColumnHeader>
             <Table.ColumnHeader>Username</Table.ColumnHeader>
             <Table.ColumnHeader>Email</Table.ColumnHeader>
+            <Table.ColumnHeader>Status</Table.ColumnHeader>
             <Table.ColumnHeader>Display Name</Table.ColumnHeader>
             <Table.ColumnHeader>Status</Table.ColumnHeader>
             <Table.ColumnHeader>Actions</Table.ColumnHeader>
