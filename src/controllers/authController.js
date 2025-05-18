@@ -39,7 +39,6 @@ const createSendToken = async (user, statusCode, req, res) => {
     token,
     expiresAt
   );
-  console.log(user);
 
   await SocketService.notifyUserLoggedOut(
     user._id,

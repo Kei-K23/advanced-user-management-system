@@ -62,6 +62,20 @@ export const AuthProvider = ({ children }) => {
       navigate("/login");
     });
 
+    newSocket.on("ban_force_logout", (res) => {
+      if (socket) socket.disconnect();
+      localStorage.removeItem("token");
+      setToken(null);
+      setSocket(null);
+      queryClient.clear();
+
+      toaster.create({
+        title: res.message,
+        type: "info",
+      });
+      navigate("/login");
+    });
+
     setTimeout(() => {
       refetchUser();
     }, 5000);

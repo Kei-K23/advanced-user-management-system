@@ -32,7 +32,6 @@ export default class SocketService {
         { $set: { active: false } }
       );
     });
-    console.log(userId, userRole);
 
     // Check login user is member and them send notifi event to super admin user
     if (userRole === "MEMBER") {
@@ -54,5 +53,29 @@ export default class SocketService {
         });
       });
     }
+  }
+
+  static async notifyUserForceLoggedOut(userId) {
+    const io = Socket.getIO();
+
+    // Find all active sessions except the current one
+    const sessions = await Session.find({
+      user: userId,
+      active: true,
+      socketId: { $exists: true },
+    });
+
+    // Notify each session to logout
+    sessions.forEach(async (session) => {
+      io.to(session.socketId).emit("ban_force_logout", {
+        message: "You have been logged out due to your account is banned",
+      });
+
+      // Invalidate the session
+      await Session.updateOne(
+        { _id: session._id },
+        { $set: { active: false } }
+      );
+    });
   }
 }

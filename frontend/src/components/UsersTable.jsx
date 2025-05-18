@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { getAllUsers } from "../api/users";
+import { banUserById, getAllUsers } from "../api/users";
 import {
   ActionBar,
   Button,
@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { HiDotsVertical } from "react-icons/hi";
 import { useAuth } from "../providers/AuthProvider";
+import { toaster } from "./ui/toaster";
 
 export default function UsersTable() {
   const queryClient = useQueryClient();
@@ -26,6 +27,19 @@ export default function UsersTable() {
 
   const hasSelection = selection.length > 0;
   const indeterminate = hasSelection && selection.length < users?.length;
+
+  const { mutate: banUserMutation, isPending: banUserMutationPending } =
+    useMutation({
+      mutationFn: banUserById,
+      onSuccess: ({ message }) => {
+        toaster.create({ title: message, type: "success" });
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+        refetchUsers();
+      },
+      onError: (data) => {
+        toaster.create({ title: data.response.data.message, type: "error" });
+      },
+    });
 
   useEffect(() => {
     if (!socket) return;
@@ -83,7 +97,16 @@ export default function UsersTable() {
             <Menu.Positioner>
               <Menu.Content>
                 <Menu.Item value="edit">Edit</Menu.Item>
-                <Menu.Item value="ban" color={"fg.warning"}>
+                <Menu.Item
+                  value="ban"
+                  color={"fg.warning"}
+                  disabled={banUserMutationPending}
+                  onClick={() => {
+                    banUserMutation({
+                      userId: item._id.toString(),
+                    });
+                  }}
+                >
                   Ban
                 </Menu.Item>
                 <Menu.Item
