@@ -122,14 +122,12 @@ export const getMe = catchAsync(async (req, res, _next) => {
 
 export const updateMe = catchAsync(async (req, res, next) => {
   const authUser = req.user;
-  const { username, displayName, email } = req.body;
+  const { username, displayName, email, bio, address } = req.body;
 
-  const user = await User.findOne({
-    $or: [{ email }, { username }],
-  });
+  const user = await User.findById(authUser._id);
 
-  if (user) {
-    return next(new AppError("Username or email already taken", 400));
+  if (!user) {
+    return next(new AppError("Username not found", 404));
   }
 
   const { password, ...updatedUser } = (
@@ -140,6 +138,8 @@ export const updateMe = catchAsync(async (req, res, next) => {
           username,
           email,
           displayName,
+          bio,
+          address,
         },
       },
       { new: true, runValidators: true }

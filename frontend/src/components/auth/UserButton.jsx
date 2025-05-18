@@ -1,20 +1,42 @@
-import { Avatar, Menu } from "@chakra-ui/react";
+import { Avatar, Icon, Menu, Portal } from "@chakra-ui/react";
 import { useAuth } from "../../providers/AuthProvider";
+import { FaRegCircleUser } from "react-icons/fa6";
+import { MdOutlineLogout } from "react-icons/md";
+import { Link } from "react-router";
 
 export default function UserButton() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
   return (
-    <Menu.Root>
-      <Menu.Trigger asChild>
+    <Menu.Root positioning={{ placement: "bottom" }}>
+      <Menu.Trigger>
         <Avatar.Root>
-          <Avatar.Fallback name={user.username} />
+          <Avatar.Fallback name={user?.username} />
+          <Avatar.Image src={user?.username} />
         </Avatar.Root>
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
           <Menu.Content>
-            <Menu.Item value="Account">Account</Menu.Item>
-            <Menu.Item value="Logout">Logout</Menu.Item>
+            <Link to={"/account"}>
+              <Menu.Item value="Account">
+                <Icon>
+                  <FaRegCircleUser />
+                </Icon>
+                Account
+              </Menu.Item>
+            </Link>
+            <Menu.Item
+              value="Logout"
+              color="fg.error"
+              _hover={{ bg: "bg.error", color: "fg.error" }}
+              onClick={logout}
+            >
+              <Icon>
+                <MdOutlineLogout />
+              </Icon>
+              Logout
+            </Menu.Item>
           </Menu.Content>
         </Menu.Positioner>
       </Portal>

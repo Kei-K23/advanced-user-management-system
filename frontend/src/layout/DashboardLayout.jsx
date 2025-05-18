@@ -13,21 +13,40 @@ import {
   MdOutlineGroups3,
   MdSettings,
 } from "react-icons/md";
+import UserButton from "../components/auth/UserButton";
+import { FaRegCircleUser } from "react-icons/fa6";
+import { LuLogs } from "react-icons/lu";
+import { useAuth } from "../providers/AuthProvider";
 
 const NAV_LINKS = [
   {
     name: "Dashboard",
     icon: MdDashboard,
     link: "/",
+    roles: ["ADMIN", "SUPER_ADMIN"],
+  },
+  {
+    name: "Account",
+    icon: FaRegCircleUser,
+    link: "/account",
+    roles: ["MEMBER", "ADMIN", "SUPER_ADMIN"],
   },
   {
     name: "Users",
     icon: MdOutlineGroups2,
     link: "/users",
+    roles: ["ADMIN", "SUPER_ADMIN"],
+  },
+  {
+    name: "Logs",
+    icon: LuLogs,
+    link: "/logs",
+    roles: ["MEMBER", "ADMIN", "SUPER_ADMIN"],
   },
 ];
 
 export default function DashboardLayout() {
+  const { user } = useAuth();
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -47,7 +66,7 @@ export default function DashboardLayout() {
       >
         <Container w={"full"} p={0}>
           <ChakraLink asChild marginTop={4} ml={5} w={"full"}>
-            <Link to={"/"}>
+            <Link to={user?.role === "MEMBER" ? "/account" : "/"}>
               <Icon size="lg" color="teal.500">
                 <MdOutlineGroups3 />
               </Icon>
@@ -58,31 +77,33 @@ export default function DashboardLayout() {
         </Container>
 
         <Flex flexDir={"column"} gap={2} flex={1} w={"full"} p={0}>
-          {NAV_LINKS.map((nav) => (
-            <Link
-              key={nav.name}
-              to={nav.link}
-              style={{
-                width: "100%",
-              }}
-            >
-              <Button
-                role="group"
-                variant={pathname === nav.link ? "solid" : "subtle"}
-                justifyContent={"start"}
-                w={"full"}
+          {NAV_LINKS.filter((nav) => nav.roles.includes(user?.role)).map(
+            (nav) => (
+              <Link
+                key={nav.name}
+                to={nav.link}
+                style={{
+                  width: "100%",
+                }}
               >
-                <Icon
-                  _groupHover={{
-                    color: "teal.500",
-                  }}
+                <Button
+                  role="group"
+                  variant={pathname === nav.link ? "solid" : "subtle"}
+                  justifyContent={"start"}
+                  w={"full"}
                 >
-                  <nav.icon />
-                </Icon>
-                {nav.name}
-              </Button>
-            </Link>
-          ))}
+                  <Icon
+                    _groupHover={{
+                      color: "teal.500",
+                    }}
+                  >
+                    <nav.icon />
+                  </Icon>
+                  {nav.name}
+                </Button>
+              </Link>
+            )
+          )}
         </Flex>
         <Container p={0} mb={4}>
           <Separator my={"2"} size={"sm"} />
@@ -114,13 +135,18 @@ export default function DashboardLayout() {
         flexDir={"column"}
       >
         {/* Navbar */}
-        <Container
+        <Flex
           bg={"whiteAlpha.100"}
           width={"full"}
           borderBottomWidth={"thin"}
           borderBottomColor={"whiteAlpha.200"}
+          justifyContent={"end"}
+          alignItems={"center"}
+          px={8}
           h={"14"}
-        ></Container>
+        >
+          <UserButton />
+        </Flex>
         <Container width={"full"} flex={1}>
           <Outlet />
         </Container>

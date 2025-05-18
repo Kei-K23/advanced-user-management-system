@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    bio: {
+      type: String,
+      default: "",
+    },
     email: {
       type: String,
       required: true,
@@ -44,6 +48,13 @@ const userSchema = new mongoose.Schema(
     },
     lastLoginTime: {
       type: Date,
+    },
+    address: {
+      type: {
+        location: String,
+        phone: String,
+        postalCode: String,
+      },
     },
   },
   {

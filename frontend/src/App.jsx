@@ -8,6 +8,8 @@ import NotFound from "./pages/NotFound";
 import DashboardLayout from "./layout/DashboardLayout";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
+import Account from "./pages/Account";
+import Logs from "./pages/Logs";
 
 function App() {
   return (
@@ -34,6 +36,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="account"
+          element={
+            <ProtectedRoute>
+              <Account />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="logs"
+          element={
+            <ProtectedRoute>
+              <Logs />
             </ProtectedRoute>
           }
         />
