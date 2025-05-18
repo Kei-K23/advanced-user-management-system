@@ -32,9 +32,18 @@ const userSchema = new mongoose.Schema(
       enum: ["PENDING", "ACTIVE", "TEMPORARY_BAN", "BAN", "DELETE"],
       default: "PENDING",
     },
+    role: {
+      type: String,
+      required: true,
+      enum: ["MEMBER", "ADMIN", "SUPER_ADMIN"],
+      default: "MEMBER",
+    },
     isOnline: {
       type: Boolean,
       default: false,
+    },
+    lastLoginTime: {
+      type: Date,
     },
   },
   {

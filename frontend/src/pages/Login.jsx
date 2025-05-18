@@ -23,13 +23,16 @@ export default function Login() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: login,
     onSuccess: ({ data, message }) => {
       authLogin(data.token);
       queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
       toaster.create({ title: message, type: "success" });
       navigate("/");
+    },
+    onError: (data) => {
+      toaster.create({ title: data.response.data.message, type: "error" });
     },
   });
 
@@ -60,7 +63,7 @@ export default function Login() {
         </Heading>
         <Text>Login in to your account to continue</Text>
         <form onSubmit={handleSubmit} style={{ width: "70%", marginTop: 20 }}>
-          <Field.Root required disabled={isLoading} width={"full"}>
+          <Field.Root required disabled={isPending} width={"full"}>
             <Field.Label>
               Email <Field.RequiredIndicator />
             </Field.Label>
@@ -70,7 +73,7 @@ export default function Login() {
               placeholder="me@example.com"
             />
           </Field.Root>
-          <Field.Root required disabled={isLoading} marginTop={2}>
+          <Field.Root required disabled={isPending} marginTop={2}>
             <Field.Label>
               Password <Field.RequiredIndicator />
             </Field.Label>
@@ -83,14 +86,14 @@ export default function Login() {
           </Field.Root>
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isPending}
             marginTop={2}
             width={"full"}
           >
-            {isLoading ? "Logging" : "Login"}
+            {isPending ? "Logging" : "Login"}
           </Button>
         </form>
-        <ChakraLink asChild marginTop={4} _disabled={isLoading}>
+        <ChakraLink asChild marginTop={4} _disabled={isPending}>
           <Link to={"/register"}>Don't have an account? Register here</Link>
         </ChakraLink>
       </Container>

@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import SessionService from "../services/sessionService.js";
 import socketAuth from "../middleware/socketAuth.js";
+import User from "../models/User.js";
 
 let io;
 
@@ -28,8 +29,16 @@ export default class Socket {
         socket?.session?.deviceInfo?.device
       );
 
-      socket.on("disconnect", () => {
+      await User.findByIdAndUpdate(socket?.user?.id, {
+        isOnline: true,
+      });
+
+      socket.on("disconnect", async () => {
         console.log(`Socket disconnected: ${socket.id}`);
+
+        await User.findByIdAndUpdate(socket?.user?.id, {
+          isOnline: false,
+        });
       });
     });
 

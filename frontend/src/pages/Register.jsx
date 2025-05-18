@@ -22,11 +22,14 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: register,
     onSuccess: ({ message }) => {
       toaster.create({ title: message, type: "success" });
       navigate("/login");
+    },
+    onError: (data) => {
+      toaster.create({ title: data.response.data.message, type: "error" });
     },
   });
 
@@ -60,7 +63,7 @@ export default function Register() {
           system
         </Text>
         <form onSubmit={handleSubmit} style={{ width: "70%", marginTop: 20 }}>
-          <Field.Root required disabled={isLoading} width={"full"}>
+          <Field.Root required disabled={isPending} width={"full"}>
             <Field.Label>
               Username <Field.RequiredIndicator />
             </Field.Label>
@@ -72,7 +75,7 @@ export default function Register() {
           </Field.Root>
           <Field.Root
             required
-            disabled={isLoading}
+            disabled={isPending}
             width={"full"}
             marginTop={2}
           >
@@ -87,7 +90,7 @@ export default function Register() {
           </Field.Root>
           <Field.Root
             required
-            disabled={isLoading}
+            disabled={isPending}
             width={"full"}
             marginTop={2}
           >
@@ -100,7 +103,7 @@ export default function Register() {
               placeholder="me@example.com"
             />
           </Field.Root>
-          <Field.Root required disabled={isLoading} marginTop={2}>
+          <Field.Root required disabled={isPending} marginTop={2}>
             <Field.Label>
               Password <Field.RequiredIndicator />
             </Field.Label>
@@ -113,14 +116,14 @@ export default function Register() {
           </Field.Root>
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isPending}
             marginTop={2}
             width={"full"}
           >
-            {isLoading ? "Registering..." : "Register"}
+            {isPending ? "Registering..." : "Register"}
           </Button>
         </form>
-        <ChakraLink asChild marginTop={4} _disabled={isLoading}>
+        <ChakraLink asChild marginTop={4} _disabled={isPending}>
           <Link to={"/login"}>Already have an account? Login here</Link>
         </ChakraLink>
       </Container>

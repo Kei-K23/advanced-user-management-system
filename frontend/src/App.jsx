@@ -5,18 +5,21 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import DashboardLayout from "./layout/DashboardLayout";
 
 function App() {
   return (
     <Routes>
-      <Route
-        index
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<DashboardLayout />}>
+        <Route
+          index
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
 
       <Route element={<AuthLayout />}>
         <Route path="login" element={<Login />} />

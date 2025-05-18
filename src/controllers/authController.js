@@ -71,6 +71,10 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect email or password", 401));
   }
 
+  // Update last login time
+  user.lastLoginTime = new Date();
+  await user.save();
+
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
