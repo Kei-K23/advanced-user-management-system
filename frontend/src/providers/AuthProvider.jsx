@@ -54,7 +54,12 @@ export const AuthProvider = ({ children }) => {
     setSocket(newSocket);
 
     newSocket.on("force_logout", (res) => {
-      logout();
+      if (socket) socket.disconnect();
+      localStorage.removeItem("token");
+      setToken(null);
+      setSocket(null);
+      queryClient.clear();
+
       toaster.create({
         title: res.message,
         type: "info",

@@ -45,7 +45,6 @@ export default class SocketService {
         user: { $in: adminIds },
         active: true,
       });
-      console.log(activeSessions, admins);
 
       activeSessions.forEach(async (session) => {
         io.to(session.socketId).emit("notify_event", {
